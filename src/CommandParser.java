@@ -34,7 +34,7 @@ public class CommandParser {
      * @throws CommandException if the input is null, empty, too big, an unknown command,
      *                          or has the wrong number of arguments
      */
-    public Command parse(String rawInput) {
+    public  Command parse(String rawInput) {
         if (rawInput == null) {
             throw new CommandException("input cannot be null");
         }
