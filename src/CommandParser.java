@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class CommandParser {
 
-    private static final int MAX_INPUT_BYTES = 10 * 1024 * 1024; // 10 MB
+    public static final int MAX_INPUT_BYTES = 1024 * 1024; // 1MB
 
     private static final Map<String, CommandSpec> COMMANDS = Map.of(
             "GET", new CommandSpec("GET", 1, false),
@@ -47,6 +47,10 @@ public class CommandParser {
         String input = rawInput.strip();
         if (input.isEmpty()) {
             throw new CommandException("empty command");
+        }
+
+        if (input.indexOf('\r') >= 0 || input.indexOf('\n') >= 0) {
+            throw new CommandException("invalid character in command");
         }
 
         // Split off only the command name and the rest of the line stays untouched so that SET can keep the spaces inside its value.
