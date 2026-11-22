@@ -8,12 +8,13 @@ public class CommandExecutor {
         this.storage = Objects.requireNonNull(storage, "storage cannot be a null");
     }
 
+    /**
+     * receives a command and execute it
+     * @param command the command needed to execute
+     * @return result of the command
+     */
+
     public String execute(Command command) {
-        /**
-         * receives a command and execute it
-         * @param command the command needed to execute
-         * @return result of the command
-         */
         List<String> args = command.args();
         return switch (command.name()) {
             case "SET" -> {
