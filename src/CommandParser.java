@@ -11,6 +11,8 @@ import java.util.Map;
  * <pre>
  *   GET key
  *   SET key value      (value is the rest of the line, spaces allowed)
+ *   PING [message]     (replies PONG, or the message if given, the message is one word)
+ *   INCR key      (adds 1 to a whole number; a missing key counts as 0)
  *   DEL key
  * </pre>
  * Command names are case-insensitive; keys and values are case-sensitive.
@@ -22,17 +24,18 @@ public class CommandParser {
     public static final int MAX_INPUT_BYTES = 1024 * 1024; // 1MB
 
     private static final Map<String, CommandSpec> COMMANDS = Map.of(
-            "GET", new CommandSpec("GET", 1, false),
-            "SET", new CommandSpec("SET", 2, true),
-            "DEL", new CommandSpec("DEL", 1, false));
+            "GET", new CommandSpec("GET", 1, 1, false),
+            "SET", new CommandSpec("SET", 2,2, true),
+            "PING",new CommandSpec("PING",0,1,false),
+            "INCR", new CommandSpec("INCR", 1, 1, false),
+            "DEL", new CommandSpec("DEL", 1,1, false));
 
     /**
      * Parses a raw text line into a normalized {@link Command}.
      *
      * @param rawInput raw line received from the client
      * @return parsed command with an upper-case name and exactly the right number of arguments
-     * @throws CommandException if the input is null, empty, too big, an unknown command,
-     *                          or has the wrong number of arguments
+     * @throws CommandException if the input is null, empty, too big, an unknown command,or has the wrong number of arguments
      */
     public  Command parse(String rawInput) {
         if (rawInput == null) {
@@ -72,14 +75,17 @@ public class CommandParser {
      * If the spec says so, the last argument takes everything that is left on the line.
      */
     private List<String> parseArgs(CommandSpec spec, String rest) {
-        List<String> args = new ArrayList<>(spec.argCount());
+        List<String> args = new ArrayList<>(spec.maxArgs());
         String remaining = rest;
 
-        for (int i = 0; i < spec.argCount(); i++) {
+        for (int i = 0; i < spec.maxArgs(); i++) {
             if (remaining.isEmpty()) {
-                throw wrongArgs(spec);
+                if(i< spec.minArgs()) {
+                    throw wrongArgs(spec);
+                }
+                break;//the optional arguments were left out
             }
-            boolean isLast = i == spec.argCount() - 1;
+            boolean isLast = i == spec.maxArgs() - 1;
             if (isLast && spec.lastArgTakesRestOfLine()) {
                 args.add(remaining);
                 remaining = "";

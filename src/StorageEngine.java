@@ -12,4 +12,14 @@ public class StorageEngine {
     public boolean del(String key){
         return store.remove(key)!=null;
     }
+    public long incr(String key){
+        if(store.get(key)==null)
+        {
+            store.put(key, String.valueOf(0));
+            return 0;
+        }
+        store.put(key,String.valueOf(Long.valueOf(store.get(key))+1));
+        return Long.valueOf(store.get(key));
+
+    }
 }
